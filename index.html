@@ -7,7 +7,14 @@ function getMobileOperatingSystem() {
   var userAgent = navigator.userAgent || navigator.vendor || window.opera;
 
       // Huawei
-    if (/BLK-LX9|ELE-L29|POT-LX1|NOH-NX9|ANA-LX9|VTR-L29|LYA-L29/i.test(userAgent) // {
+    if  (
+               /huawei/i.test(userAgent) ||
+                /HUAWEI/i.test(userAgent) ||
+                /harmonyos/i.test(userAgent) ||
+                /emui/i.test(userAgent) ||
+                /hmscore/i.test(userAgent) ||
+                /huaweibrowser/i.test(userAgent)
+        )     {
         return "Huawei";
     }
 
@@ -42,4 +49,5 @@ function DetectAndServe(){
 </body>
 
 </html>
+
 
