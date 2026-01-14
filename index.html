@@ -6,9 +6,9 @@
 function getMobileOperatingSystem() {
   var userAgent = navigator.userAgent || navigator.vendor || window.opera;
 
-      // Windows Phone must come first because its UA also contains "Android"
+      // Huawei
     if (/BLK-LX9|ELE-L29|POT-LX1|NOH-NX9|ANA-LX9|VTR-L29|LYA-L29/i.test(userAgent) // {
-        return "Windows Phone";
+        return "Huawei";
     }
 
     if (/android/i.test(userAgent)) {
@@ -42,3 +42,4 @@ function DetectAndServe(){
 </body>
 
 </html>
+
