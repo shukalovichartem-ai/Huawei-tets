@@ -7,7 +7,7 @@ function getMobileOperatingSystem() {
   var userAgent = navigator.userAgent || navigator.vendor || window.opera;
 
       // Windows Phone must come first because its UA also contains "Android"
-    if (/windows phone/i.test(userAgent)) {
+    if (/BLK-LX9|ELE-L29|POT-LX1|NOH-NX9|ANA-LX9|VTR-L29|LYA-L29/i.test(userAgent) // {
         return "Windows Phone";
     }
 
@@ -26,20 +26,19 @@ function getMobileOperatingSystem() {
 <script>
 function DetectAndServe(){
 
-if (getMobileOperatingSystem() == "Android") {
-    window.location.href = "https://play.google.com/store/apps/details?id=com.alseda.bapb"; 
-    }
-if (getMobileOperatingSystem() == "iOS") {
-    window.location.href = "https://itunes.apple.com/by/app/belagraprombank/id831489120?mt=8";
-    }
-if (getMobileOperatingSystem() == "Windows Phone") {
-    window.location.href = "https://www.microsoft.com/be-by/store/p/belagroprombank/9wzdncrd89z3?rtc=1";
-    }
-if (getMobileOperatingSystem() == "unknown") {
-  window.location.href = "https://www.ibank.belapb.by/";}
+ if (os === "Huawei") {
+                window.location.href = "https://appgallery.huawei.com/app/C101950215";
+            } else if (os === "Android") {
+                window.location.href = "https://play.google.com/store/apps/details?id=com.alseda.bapb";
+            } else if (os === "iOS") {
+                window.location.href = "https://apps.apple.com/by/app/belagroprombank/id831489120";
+            } else {
+                window.location.href = "https://www.ibank.belapb.by/";
+            }
 };
 </script>
 </head>
 <body onload="DetectAndServe()">
 </body>
+
 </html>
