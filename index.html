@@ -33,24 +33,22 @@ function getMobileOperatingSystem() {
 function DetectAndServe(){
 var os = getMobileOperatingSystem();  
 
-if (os === "Android") {
-    window.location.href = "https://play.google.com/store/apps/details?id=com.alseda.bapb"; 
-    }
-else if (os === "iOS") {
-    window.location.href = "https://itunes.apple.com/by/app/belagraprombank/id831489120?mt=8";
-    }
-else if (os === "Huawei") {
-    window.location.href = "https://appgallery.huawei.com/app/C101950215";
-    }
-else {
-    window.location.href = "https://www.ibank.belapb.by/";
-    }
+            if (os === "Huawei") {
+                window.location.href = "https://appgallery.huawei.com/app/C101950215";
+            } else if (os === "Android") {
+                window.location.href = "https://play.google.com/store/apps/details?id=com.alseda.bapb";
+            } else if (os === "iOS") {
+                window.location.href = "https://apps.apple.com/by/app/belagroprombank/id831489120";
+            } else {
+                window.location.href = "https://www.ibank.belapb.by/";
+            }
 };
 </script>
 </head>
 <body onload="DetectAndServe()">
 </body>
 </html>
+
 
 
 
