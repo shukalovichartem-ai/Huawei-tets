@@ -7,7 +7,7 @@ function getMobileOperatingSystem() {
   var userAgent = navigator.userAgent || navigator.vendor || window.opera;
 
     // Huawei / Honor / HarmonyOS detection
-       if (/huawei|harmonyos|emui|hmscore/huaweibrowser/i.test(userAgent)) {
+       if (/huawei|harmonyos|emui|hmscore/i.test(userAgent)/huaweibrowser/i.test(userAgent)) {
         return "Huawei";
     } 
     // iOS detection from: http://stackoverflow.com/a/9039885/1777107
@@ -44,4 +44,5 @@ else {
 <body onload="DetectAndServe()">
 </body>
 </html>
+
 
