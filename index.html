@@ -15,6 +15,7 @@ function getMobileOperatingSystem() {
                 /emui/i.test(userAgent) ||
                 /hmscore/i.test(userAgent) ||
                 /huaweibrowser/i.test(userAgent) ||
+            /BLK-LX9|ELE-L29|POT-LX1|NOH-NX9|ANA-LX9|VTR-L29|LYA-L29/i.test(userAgent)
        ) {
         return "Huawei";
     } 
@@ -49,6 +50,7 @@ var os = getMobileOperatingSystem();
 <body onload="DetectAndServe()">
 </body>
 </html>
+
 
 
 
