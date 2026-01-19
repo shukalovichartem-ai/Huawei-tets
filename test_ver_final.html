@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Belagroprombank App Redirect</title>
+<script>
+
+function getMobileOperatingSystem() {
+    var userAgent = navigator.userAgent || navigator.vendor || window.opera;
+
+    // Windows Phone должен проверяться первым, т.к. его UA также содержит "Android"
+    if (/windows phone/i.test(userAgent)) {
+        return "Windows Phone";
+    }
+
+    if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+        return "iOS";
+    }
+
+    if (/android/i.test(userAgent)) {
+        return "Android";
+    }
+
+    return "unknown";
+}
+
+/**
+ * Проверяет, является ли устройство Huawei через нативные API (если доступны)
+ * Работает в WebView с JavaScript bridge (Cordova, React Native, нативные WebView)
+ * Источник: https://stackoverflow.com/questions/73979344/android-how-to-detect-the-device-is-huawei-or-not
+ * @returns {boolean|null} true если Huawei, false если не Huawei, null если API недоступны
+ */
+function isHuaweiDeviceNative() {
+    try {
+        // Проверка для Android WebView с доступом к Build API
+        // Различные варианты доступа через JavaScript bridge:
+        
+        // 1. Cordova/PhoneGap плагин
+        if (window.device && window.device.manufacturer) {
+            const manufacturer = window.device.manufacturer.toLowerCase();
+            const brand = (window.device.model || '').toLowerCase();
+            return manufacturer.includes('huawei') || brand.includes('huawei');
+        }
+        
+        // 2. React Native WebView injected JavaScript
+        if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+            // Если есть доступ к нативным данным через React Native
+            // (требует настройки на нативной стороне)
+            if (window.deviceInfo) {
+                const manufacturer = (window.deviceInfo.manufacturer || '').toLowerCase();
+                const brand = (window.deviceInfo.brand || '').toLowerCase();
+                return manufacturer.includes('huawei') || brand.includes('huawei');
+            }
+        }
+        
+        // 3. Нативный Android WebView с injected JavaScript
+        // Если нативная сторона предоставляет объект AndroidDevice
+        // Пример нативной реализации (Kotlin):
+        // webView.addJavascriptInterface(object {
+        //     @JavascriptInterface
+        //     fun getManufacturer() = Build.MANUFACTURER
+        //     @JavascriptInterface
+        //     fun getBrand() = Build.BRAND
+        // }, "AndroidDevice")
+        if (window.AndroidDevice) {
+            try {
+                if (typeof window.AndroidDevice.getManufacturer === 'function' &&
+                    typeof window.AndroidDevice.getBrand === 'function') {
+                    const manufacturer = (window.AndroidDevice.getManufacturer() || '').toLowerCase();
+                    const brand = (window.AndroidDevice.getBrand() || '').toLowerCase();
+                    if (manufacturer.includes('huawei') || brand.includes('huawei')) {
+                        return true;
+                    }
+                    // Если manufacturer/brand определены, но не Huawei - это не Huawei устройство
+                    if (manufacturer || brand) {
+                        return false;
+                    }
+                }
+            } catch (e) {
+                // Игнорируем ошибки доступа к методам
+            }
+        }
+        
+        // 4. Универсальный вариант через window.DeviceInfo (если настроен на нативной стороне)
+        if (window.DeviceInfo) {
+            const manufacturer = (window.DeviceInfo.manufacturer || '').toLowerCase();
+            const brand = (window.DeviceInfo.brand || '').toLowerCase();
+            return manufacturer.includes('huawei') || brand.includes('huawei');
+        }
+        
+        return null; // Нативные API недоступны
+    } catch (e) {
+        // Игнорируем ошибки доступа к нативным API
+        return null;
+    }
+}
+
+function isHuaweiDeviceHardware() {
+    // Сначала проверяем нативные API (если доступны в WebView)
+    const nativeCheck = isHuaweiDeviceNative();
+    if (nativeCheck !== null) {
+        return nativeCheck;
+    }
+    
+    // Fallback на проверку через User Agent
+    const ua = navigator.userAgent;
+    
+    // Основной метод: проверка кодов моделей Huawei устройств
+    // https://stackoverflow.com/questions/66048820/how-to-target-huawei-specific-user-agents
+    // https://gist.github.com/megaacheyounes/e1c7eec5c790e577db602381b8c50bfa
+    const huaweiDevicesRegex = /ALP-|AMN-|ANA-|ANE-|ANG-|AQM-|ARS-|ART-|ATU-|BAC-|BLA-|BRQ-|CAG-|CAM-|CAN-|CAZ-|CDL-|CDY-|CLT-|CRO-|CUN-|DIG-|DRA-|DUA-|DUB-|DVC-|ELE-|ELS-|EML-|EVA-|EVR-|FIG-|FLA-|FRL-|GLK-|HMA-|HW-|HWI-|INE-|JAT-|JEF-|JER-|JKM-|JNY-|JSC-|LDN-|LIO-|LON-|LUA-|LYA-|LYO-|MAR-|MED-|MHA-|MLA-|MRD-|MYA-|NCE-|NEO-|NOH-|NOP-|OCE-|PAR-|PIC-|POT-|PPA-|PRA-|RNE-|SEA-|SLA-|SNE-|SPN-|STK-|TAH-|TAS-|TET-|TRT-|VCE-|VIE-|VKY-|VNS-|VOG-|VTR-|WAS-|WKG-|WLZ-|JAD-|MLD-|RTE-|NAM-|NEN-|BAL-|JLN-|YAL|MGA-|FGD-|XYAO-|BON-|ALN-|ALT-|BRA-|DBY2-|STG-|MAO-|LEM-|GOA-|FOA-|MNA-|LNA-/i;
+    
+    if (huaweiDevicesRegex.test(ua)) {
+        return true;
+    }
+    
+    // Проверка на HuaweiBrowser - специфичный браузер Huawei
+    if (/huaweibrowser/i.test(ua) && /android/i.test(ua)) {
+        return true;
+    }
+    
+    // Проверка на явные признаки Huawei бренда в UA
+    if (/android/i.test(ua)) {
+        if (/huawei|honor/i.test(ua)) {
+            return true;
+        }
+    }
+    
+    return false;
+}
+
+function hasHuaweiServices() {
+    const ua = navigator.userAgent;
+    
+    // Проверяем наличие HMS Core (Huawei Mobile Services)
+    if (/hmscore/i.test(ua)) {
+        return true;
+    }
+    
+    // Проверяем наличие EMUI (прошивка Huawei)
+    if (/emui/i.test(ua)) {
+        return true;
+    }
+    
+    return false;
+}
+
+function getDeviceType() {
+    const os = getMobileOperatingSystem();
+    
+    if (os === "iOS") {
+        return "iOS";
+    }
+    
+    if (os === "Android") {
+        if (isHuaweiDeviceHardware()) {
+            return "Huawei";
+        }
+        
+        // Если Android устройство, но установлены Huawei сервисы или OS Huawei
+        if (hasHuaweiServices()) {
+            return "Huawei";
+        }
+        
+        return "Android";
+    }
+    
+    return "unknown";
+}
+
+/**
+ * Проверяет доступность AppGallery через deep link
+ * @returns {Promise<boolean>}
+ */
+function checkAppGalleryAvailability() {
+    return new Promise((resolve) => {
+        // Создаем скрытый iframe для проверки доступности AppGallery
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = 'appmarket://details?id=com.alseda.bapb';
+        
+        let resolved = false;
+        const timeout = setTimeout(() => {
+            if (!resolved) {
+                resolved = true;
+                document.body.removeChild(iframe);
+                resolve(false);
+            }
+        }, 1000);
+        
+        iframe.onload = () => {
+            if (!resolved) {
+                resolved = true;
+                clearTimeout(timeout);
+                document.body.removeChild(iframe);
+                resolve(true);
+            }
+        };
+        
+        iframe.onerror = () => {
+            if (!resolved) {
+                resolved = true;
+                clearTimeout(timeout);
+                document.body.removeChild(iframe);
+                resolve(false);
+            }
+        };
+        
+        document.body.appendChild(iframe);
+    });
+}
+
+/**
+ * Основная функция определения устройства и перенаправления
+ * Логика определения:
+ * 1. Если iOS → iOS (App Store)
+ * 2. Если Android устройство + Google/Android сервисы → Android (Google Play)
+ * 3. Если Huawei устройство → Huawei (AppGallery)
+ * 4. Если Android устройство, но установлены Huawei сервисы или OS Huawei → Huawei (AppGallery)
+ */
+async function DetectAndServe() {
+    const deviceType = getDeviceType();
+    let redirectUrl = null;
+    
+    switch (deviceType) {
+        case "iOS":
+            redirectUrl = "https://itunes.apple.com/by/app/belagraprombank/id831489120?mt=8";
+            break;
+            
+        case "Android":
+            redirectUrl = "https://play.google.com/store/apps/details?id=com.alseda.bapb";
+            break;
+            
+        case "Huawei":
+            // Huawei устройство → AppGallery
+            // Android устройство, но установлены Huawei сервисы или OS Huawei → AppGallery
+            // Дополнительная проверка доступности AppGallery (опционально)
+            // Можно раскомментировать для более точного определения
+            const hasAppGallery = await checkAppGalleryAvailability();
+            redirectUrl = hasAppGallery 
+                ? "https://appgallery.cloud.huawei.com/ag/n/app/C101950215?locale=ru_RU"
+                : "https://play.google.com/store/apps/details?id=com.alseda.bapb";
+            
+            // redirectUrl = "https://appgallery.cloud.huawei.com/ag/n/app/C101950215?locale=ru_RU";
+            break;
+            
+        case "unknown":
+        default:
+            const os = getMobileOperatingSystem();
+            if (os === "Windows Phone") {
+                redirectUrl = "https://www.microsoft.com/be-by/store/p/belagroprombank/9wzdncrd89z3?rtc=1";
+            } else {
+                redirectUrl = "https://www.ibank.belapb.by/";
+            }
+            break;
+    }
+    
+    if (redirectUrl) {
+        window.location.href = redirectUrl;
+    }
+}
+</script>
+</head>
+<body onload="DetectAndServe()">
+    <noscript>
+        <p>Пожалуйста, включите JavaScript для перенаправления на приложение.</p>
+        <p><a href="https://www.ibank.belapb.by/">Перейти на веб-сайт</a></p>
+    </noscript>
+</body>
+</html>
